@@ -1,70 +1,33 @@
-# Getting Started with Create React App
+# Big file upload
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Uploading a big file on web is an issue. Most browsers don't support uploading big file more than 1-2 GB.
+A solution to this problem is to upload a file in chunks.
 
-## Available Scripts
+### Using chunks
 
-In the project directory, you can run:
+Uploading a file using chunks is a simple but effective solution to upload big files.
+Basically we do these steps:
 
-### `yarn start`
+1. Get the file context in the frontend, find out the size of the file.
+2. Make chunks of the bytes based on a pre-defined chunkSize
+3. Upload chunks to the server sequentially.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+### How does backend handle chunks
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+1. From frontend we give our uploaded file a unique file id, which helps backend to realize the existing chunks that have already been uploaded.
+2. We send the unique file id in the `x-file-name` header.
+3. Backend checks if the file already has some bytes uploaded previously, if yes, then the backend appends using a filestream to the existing file
 
-### `yarn test`
+### Resumable Upload
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+We can take advantage of resuming our file upload with the chunk upload approach.
+To acheive this, we have defined three API calls in the server.
 
-### `yarn build`
+1. `/upload/status`: We will send the unique file id in the header `x-file-name` and file size in the headder `file-size`. Backend will let us know how many bytes have already been uploaded for this file. If no bytes are uploaded then the backend will return `uploaded` 0.
+2. `/upload/files`: After the status api call, we will have the uploaded bytes, based on that we will make chunks of the remaining bytes of the file and start uploading them sequentially.
+3. `/upload/complete`: After all chunks have been uploaded, we will make the complete api call so that backend can do cleanup.
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+### Running
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `yarn eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `yarn build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+1. Frontend: run frontend using command `yarn start` after installing node modules.
+2. Backend: run backend using `yarn server`

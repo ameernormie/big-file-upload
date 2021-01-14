@@ -36,7 +36,7 @@ function Upload() {
     const fileId = `${file_obj.size}-${file_obj.lastModified}-${file_obj.name}`;
 
     axios
-      .get("http://localhost:3002/api/upload/status", {
+      .get("http://localhost:3002/upload/status", {
         headers: {
           "x-file-name": fileId,
           "file-size": file_obj.size,
@@ -75,7 +75,7 @@ function Upload() {
       uploadChunk(chunk);
     } else {
       axios
-        .post("http://localhost:3002/api/upload/complete", {
+        .post("http://localhost:3002/upload/complete", {
           headers: {
             "x-file-name": fileId,
           },
@@ -95,7 +95,7 @@ function Upload() {
       uploadedBytes,
     } = fileState;
     axios
-      .post("http://localhost:3002/api/upload/files", chunk, {
+      .post("http://localhost:3002/upload/files", chunk, {
         headers: {
           "x-file-name": fileId,
           "Content-Range": `bytes ${startChunk}-${endChunk}/${fileSize}`,
